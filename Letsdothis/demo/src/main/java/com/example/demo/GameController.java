@@ -1,49 +1,58 @@
 package com.example.demo;
+
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
 
 @RestController
 public class GameController {
+    private final GameLogic gameLogic;
 
-    private Game game;
-
-    public GameController() {
-        this.game = new Game();
+    public GameController(GameLogic gameLogic) {
+        this.gameLogic = gameLogic;
+        gameLogic.initGame();
     }
 
-    @GetMapping("/")
+    @GetMapping("/start")
     public ResponseEntity<String> startGame() {
-        // Call the playerSetUp() method to initialize the game
-        game.playerSetUp();
-        return ResponseEntity.ok("Game started! Your HP: " + game.playerHP + ", Your Weapon: " + game.playerWeapon);
+        gameLogic.initGame();
+        return ResponseEntity.ok(gameLogic.getGameState());
+    }
+
+    @GetMapping("/intro")
+    public ResponseEntity<String> gameIntroduction() {
+        return ResponseEntity.ok(gameLogic.gameIntroduction());
+    }
+
+    @PostMapping("/setup")
+    public ResponseEntity<String> playerSetup(@RequestBody String playerName) {
+        return ResponseEntity.ok(gameLogic.playerSetUp(playerName));
     }
 
     @PostMapping("/choice")
-    public ResponseEntity<String> makeChoice(@RequestBody String choice) {
-        int choiceNum = Integer.parseInt(choice);
+    public ResponseEntity<String> makeChoice(@RequestBody Map<String, Integer> requestBody) {
+        Integer choice = requestBody.get("choice");
+        if (choice == null) {
+            return ResponseEntity.badRequest().body("Missing 'choice' parameter");
+        }
+
         String gameOutput;
-    
-        switch (choiceNum) {
+        switch (choice) {
             case 1:
-                game.townGate();
-                gameOutput = "You chose to talk to the guard.";
+                gameOutput = gameLogic.townGate(choice);
                 break;
             case 2:
-                gameOutput = "You attacked the guard! (Implement the attack logic here)";
+                gameOutput = gameLogic.west();
                 break;
             case 3:
-                game.crossRoad();
-                gameOutput = "You chose to leave the town.";
+                gameOutput = gameLogic.crossRoad();
                 break;
             // Add more cases for other choices
             default:
                 gameOutput = "Invalid choice!";
                 break;
         }
-    
         return ResponseEntity.ok(gameOutput);
     }
 }

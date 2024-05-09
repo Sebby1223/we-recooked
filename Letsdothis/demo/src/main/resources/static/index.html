@@ -1,14 +1,73 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta charset="UTF-8">
-  <title>Text-Based Game</title>
-  <link rel="stylesheet" href="game.css">
+  <title>Text Adventure Game</title>
 </head>
 <body>
-  <div id="gameOutput"></div>
-  <input type="text" id="userInput" name="Enter your choice">
-  <button id="sendButton">Send</button>
-  <script src="game.js"></script>
+  <div id="output"></div>
+  
+  <div id="input-container" style="display: none;">
+    <input type="text" id="input-field" placeholder="Enter your input">
+    <button onclick="sendInput()">Send</button>
+  </div>
+  
+  <script>
+    // Function to start the game and display the game introduction
+    function startGame() {
+      fetch('http://localhost:8080/intro')
+        .then(response => response.text())
+        .then(result => {
+          document.getElementById('output').innerHTML = result;
+          document.getElementById('input-container').style.display = 'block';
+          document.getElementById('input-field').focus();
+        })
+        .catch(error => {
+          console.error('Error:', error);
+        });
+    }
+    
+    // Function to send user input to the server
+    function sendInput() {
+      const inputField = document.getElementById('input-field');
+      const input = inputField.value;
+      inputField.value = '';
+      
+      fetch('http://localhost:8080/setup', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'text/plain'
+        },
+        body: input
+      })
+        .then(response => response.text())
+        .then(result => {
+          document.getElementById('output').innerHTML = result;
+        })
+        .catch(error => {
+          console.error('Error:', error);
+        });
+    }
+    
+    // Function to send the player's choice to the server
+    function sendChoice(choice) {
+      fetch('http://localhost:8080/choice', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ choice: choice })
+      })
+        .then(response => response.text())
+        .then(result => {
+          document.getElementById('output').innerHTML = result;
+        })
+        .catch(error => {
+          console.error('Error:', error);
+        });
+    }
+    
+    // Call the startGame function when the page loads
+    window.onload = startGame;
+  </script>
 </body>
 </html>

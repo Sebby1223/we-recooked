@@ -1,14 +1,21 @@
 package com.example.demo;
 
+
+import org.springframework.stereotype.Component;
+
 import java.util.Random;
 
+@Component
+
 public class GameLogic {
+    
     private int playerHP;
     private String playerName;
     private String playerWeapon;
     private int monsterHP;
     private int silverRing;
 
+    
     public void initGame() {
         playerHP = 10;
         monsterHP = 15;
@@ -16,13 +23,20 @@ public class GameLogic {
         silverRing = 0;
     }
 
+    public String gameIntroduction() {
+        return "Welcome to the Text Adventure Game!" +
+               "\nYou are about to embark on an exciting journey." +
+               "\nBefore we begin, please enter your name:";
+    }
+
     public String getGameState() {
-        return "Your HP: " + playerHP + "\nYour Weapon: " + playerWeapon;
+        return "Your HP: \n" + playerHP + "\nYour Weapon: \n" + playerWeapon;
     }
 
     public String playerSetUp(String name) {
-        playerName = name;
-        return "Hello " + playerName + ", let's start the game!";
+            playerName = name;
+            return "Hello " + playerName + ", let's start the game!" +
+           "\n\n" + getGameState();
     }
 
     public String townGate(int choice) {

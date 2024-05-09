@@ -1,30 +1,36 @@
-// Fetch game data from the server
-fetch('/') // Endpoint for starting the game
-  .then(response => response.text())
-  .then(data => {
-    // Update the HTML with the game data
-    document.getElementById('gameOutput').innerText = data;
-  })
-  .catch(error => console.error('Error:', error));
+// game.js
 
-// Send user input to the server
-const userInput = document.getElementById('userInput');
-const sendButton = document.getElementById('sendButton');
-
-sendButton.addEventListener('click', () => {
-  const choice = userInput.value;
-  fetch('/choice', {
+// Function to send the player's choice to the server
+function sendChoice(choice) {
+  fetch('http://localhost:8080/choice', {
     method: 'POST',
     headers: {
-      'Content-Type': 'text/plain'
+      'Content-Type': 'application/json'
     },
-    body: choice
+    body: JSON.stringify({ choice: choice })
   })
     .then(response => response.text())
-    .then(data => {
-      // Update the HTML with the server's response
-      document.getElementById('gameOutput').innerText += '\n' + data;
-      userInput.value = ''; // Clear the input field
+    .then(result => {
+      // Update the game output with the server's response
+      document.getElementById('output').innerHTML = result;
     })
-    .catch(error => console.error('Error:', error));
+    .catch(error => {
+      console.error('Error:', error);
+    });
+}
+
+// Function to handle the player's choice
+function makeChoice(choice) {
+  sendChoice(choice);
+}
+
+// Event listener for the choice buttons
+document.addEventListener('DOMContentLoaded', function() {
+  var choiceButtons = document.getElementsByClassName('choice-btn');
+  for (var i = 0; i < choiceButtons.length; i++) {
+    choiceButtons[i].addEventListener('click', function() {
+      var choice = parseInt(this.getAttribute('data-choice'));
+      makeChoice(choice);
+    });
+  }
 });
